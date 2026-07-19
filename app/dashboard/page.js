@@ -23,7 +23,6 @@ export default function Dashboard() {
   const [phrases, setPhrases] = useState([]);
   const [exercisesLoading, setExercisesLoading] = useState(false);
   
-  // 4-by-4 page progression index
   const [currentBatchIndex, setCurrentBatchIndex] = useState(0); 
   const sentencesPerBatch = 4;
   const targetCompletedPerDay = 20;
@@ -56,7 +55,6 @@ export default function Dashboard() {
     checkUserAndFetchData();
   }, [router]);
 
-  // Fetch 20 high-quality sentences per day
   const fetchCurriculumForDay = async (day) => {
     setExercisesLoading(true);
     setCurrentBatchIndex(0); 
@@ -101,12 +99,10 @@ export default function Dashboard() {
     }
   };
 
-  // Extract the current set of 4 sentences
   const activeBatchStart = currentBatchIndex * sentencesPerBatch;
   const activeBatchEnd = activeBatchStart + sentencesPerBatch;
   const currentBatchPhrases = phrases.slice(activeBatchStart, activeBatchEnd);
 
-  // Checks if the current set of 4 has been successfully verified
   const isActiveBatchCleared = () => {
     if (currentBatchPhrases.length === 0) return false;
     return currentBatchPhrases.every(p => completedPhrases.includes(p.id));
@@ -150,7 +146,6 @@ export default function Dashboard() {
     }
   };
 
-  // Safety trigger resetting the active user back to absolute zero
   const handleResetAllData = () => {
     if (!user) return;
     const confirmReset = window.confirm(
@@ -192,18 +187,18 @@ export default function Dashboard() {
       
       {/* Premium Header */}
       <header className="border-b border-slate-200 bg-white sticky top-0 z-50 px-4 sm:px-6 py-4 shadow-sm">
-        <div className="max-w-6xl w-full mx-auto flex flex-row justify-between items-center">
-          <span className="text-xl font-black tracking-wider text-[#F77F00] flex items-center gap-2">
-            🇨🇮 NaijaToBabi <span className="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-mono font-normal">30-Day Master Course</span>
+        <div className="max-w-6xl w-full mx-auto flex flex-row justify-between items-center gap-4">
+          <span className="text-xl font-black tracking-wider text-[#F77F00] flex items-center gap-2 shrink-0">
+            🇨🇮 NaijaToBabi <span className="hidden sm:inline text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-mono font-normal">30-Day Master Course</span>
           </span>
-          <div className="flex items-center space-x-3">
-            <span className="text-xs text-slate-500 font-mono truncate">👤 {user?.email}</span>
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="hidden sm:block text-xs text-slate-500 font-mono truncate max-w-[120px]">👤 {user?.email}</span>
             <button 
               onClick={async () => {
                 await supabase.auth.signOut();
                 router.push('/');
               }}
-              className="px-4 py-2 border border-slate-200 hover:border-red-400 bg-white hover:bg-red-50 text-xs font-bold rounded-xl text-slate-600 hover:text-red-600 transition-all active:scale-95"
+              className="px-4 py-2 border border-slate-200 hover:border-red-400 bg-white hover:bg-red-50 text-xs font-bold rounded-xl text-slate-600 hover:text-red-600 transition-all active:scale-95 whitespace-nowrap"
             >
               Log Out
             </button>
@@ -235,10 +230,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Main Container Layout */}
       <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 flex-grow space-y-6">
-        
-        {/* Navigation Tabs */}
         <div className="flex space-x-2 border-b border-slate-200">
           <button 
             onClick={() => setActiveTab('campaign')}
@@ -258,10 +250,7 @@ export default function Dashboard() {
           </button>
         </div>
 
-        {/* 2-Column Responsive Layout Map */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          
-          {/* Left Panel */}
           <div className="lg:col-span-4 space-y-6">
             <div className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4 shadow-sm">
               <div className="flex items-center gap-2">
@@ -288,7 +277,6 @@ export default function Dashboard() {
             />
           </div>
 
-          {/* Right Panel */}
           <div className="lg:col-span-8">
             {activeTab === 'campaign' ? (
               <div className="space-y-6">
@@ -338,7 +326,6 @@ export default function Dashboard() {
                 )}
               </div>
             ) : (
-              /* Quick Expression Soundboard */
               <div className="bg-white border border-slate-200 p-6 rounded-2xl space-y-4 shadow-sm">
                 <div>
                   <h3 className="font-bold text-slate-800 text-sm">📣 Street Expressions</h3>
@@ -355,15 +342,12 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 border-t border-slate-200 text-center text-xs text-slate-400 font-mono">
         © 2026 NaijaToBabi. Built for premium street education.
       </footer>
-
     </div>
   );
 }

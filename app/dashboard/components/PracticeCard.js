@@ -14,6 +14,7 @@ export default function PracticeCard({
   const audioTimeoutRef = useRef(null);
   const voicesRef = useRef({ nouchiVoice: null, standardVoice: null });
   const practiceRecognitionRef = useRef(null);
+  const isPlayingRef = useRef(false); // Persistent ref to instantly halt speech loop
 
   useEffect(() => {
     setFeedback(null);
@@ -46,6 +47,7 @@ export default function PracticeCard({
   }, [phrase]);
 
   const stopPlayback = () => {
+    isPlayingRef.current = false;
     if (typeof window !== 'undefined' && window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
@@ -54,35 +56,41 @@ export default function PracticeCard({
   };
 
   const startDualVoiceLoop = () => {
-    if (isCurrentActive) {
+    if (isCurrentActive || isPlayingRef.current) {
       stopPlayback();
       return;
     }
     stopPlayback();
+    isPlayingRef.current = true;
     setIsCurrentActive(true);
 
     const runSequence = () => {
+      if (!isPlayingRef.current) return;
       const synth = window.speechSynthesis;
       if (!synth) return;
 
       const utteranceNouchi = new SpeechSynthesisUtterance(phrase.nouchi);
       utteranceNouchi.lang = "fr-FR";
-      utteranceNouchi.rate = 0.60; // Reduced speed for clearer pronunciation
+      utteranceNouchi.rate = 0.9; // Balanced natural speed
       if (voicesRef.current.nouchiVoice) utteranceNouchi.voice = voicesRef.current.nouchiVoice;
 
       const utteranceFrench = new SpeechSynthesisUtterance(phrase.french.replace(/^(Formal:\s*)/i, ''));
       utteranceFrench.lang = "fr-FR";
-      utteranceFrench.rate = 0.65; // Reduced speed for clearer pronunciation
+      utteranceFrench.rate = 0.9; // Balanced natural speed
       if (voicesRef.current.standardVoice) utteranceFrench.voice = voicesRef.current.standardVoice;
 
       utteranceNouchi.onend = () => {
+        if (!isPlayingRef.current) return;
         audioTimeoutRef.current = setTimeout(() => {
+          if (!isPlayingRef.current) return;
           synth.speak(utteranceFrench);
         }, 1000);
       };
 
       utteranceFrench.onend = () => {
+        if (!isPlayingRef.current) return;
         audioTimeoutRef.current = setTimeout(() => {
+          if (!isPlayingRef.current) return;
           runSequence();
         }, 2000);
       };
@@ -169,7 +177,7 @@ export default function PracticeCard({
             onClick={startDualVoiceLoop}
             className={`h-9 w-9 rounded-full flex items-center justify-center border transition-all duration-300 shrink-0 ${
               isCurrentActive 
-                ? 'bg-[#F77F00] border-[#F77F00] text-white' 
+                ? 'bg-[#F77F00] border-[#F77F00] text-white shadow-md' 
                 : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-[#F77F00]'
             }`}
           >

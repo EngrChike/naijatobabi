@@ -67,12 +67,12 @@ export default function PracticeCard({
 
       const utteranceNouchi = new SpeechSynthesisUtterance(phrase.nouchi);
       utteranceNouchi.lang = "fr-FR";
-      utteranceNouchi.rate = 0.80;
+      utteranceNouchi.rate = 0.60; // Reduced speed for clearer pronunciation
       if (voicesRef.current.nouchiVoice) utteranceNouchi.voice = voicesRef.current.nouchiVoice;
 
       const utteranceFrench = new SpeechSynthesisUtterance(phrase.french.replace(/^(Formal:\s*)/i, ''));
       utteranceFrench.lang = "fr-FR";
-      utteranceFrench.rate = 0.88;
+      utteranceFrench.rate = 0.65; // Reduced speed for clearer pronunciation
       if (voicesRef.current.standardVoice) utteranceFrench.voice = voicesRef.current.standardVoice;
 
       utteranceNouchi.onend = () => {
@@ -116,8 +116,8 @@ export default function PracticeCard({
       if (!event.results || event.results.length === 0) return;
       const speechOutput = event.results[0][0].transcript.trim().toLowerCase();
       
-      const cleanOutput = speechOutput.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
-      const cleanTarget = phrase.nouchi.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "").trim();
+      const cleanOutput = speechOutput.replace(/[.,\/#$%\^&\*;:{}=\-_`~()?]/g, "");
+      const cleanTarget = phrase.nouchi.toLowerCase().replace(/[.,\/#$%\^&\*;:{}=\-_`~()?]/g, "").trim();
 
       const hasMatched = cleanOutput.includes(cleanTarget) || 
                          cleanTarget.includes(cleanOutput) || 

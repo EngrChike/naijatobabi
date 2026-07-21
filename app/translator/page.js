@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabaseClient';
-import { Mic, Globe, ArrowLeft, Loader2, Sparkles, Languages } from 'lucide-react';
+import { Mic, Globe, ArrowLeft, Loader2, Sparkles, Languages, Volume2 } from 'lucide-react';
 
 export default function WalkieTalkie() {
   const router = useRouter();
@@ -13,6 +13,7 @@ export default function WalkieTalkie() {
   const [speechText, setSpeechText] = useState("");
   const [translatedText, setTranslatedText] = useState("");
   const [isTranslating, setIsTranslating] = useState(false);
+  const [lastSpeakerDirection, setLastSpeakerDirection] = useState('me'); // tracks language for replay
 
   const recognitionRef = useRef(null);
 
@@ -48,6 +49,7 @@ export default function WalkieTalkie() {
     if (activeSpeaker === speaker) { recognitionRef.current.stop(); setActiveSpeaker(null); return; }
 
     setActiveSpeaker(speaker);
+    setLastSpeakerDirection(speaker);
     setSpeechText("Listening...");
     setTranslatedText("");
     recognitionRef.current.lang = speaker === 'me' ? 'en-US' : 'fr-FR';
@@ -75,6 +77,13 @@ export default function WalkieTalkie() {
     } finally {
       setIsTranslating(false);
     }
+  };
+
+  // Manual replay button handler
+  const handleReplayAudio = () => {
+    if (!translatedText || isTranslating) return;
+    const targetLang = lastSpeakerDirection === 'me' ? 'fr-FR' : 'en-US';
+    speakOutLoud(translatedText, targetLang);
   };
 
   const openGoogleTranslate = () => {
@@ -110,7 +119,23 @@ export default function WalkieTalkie() {
               <div className="text-slate-400 text-xs uppercase font-bold tracking-tighter">Captured</div>
               <p className="text-lg font-medium text-white italic">"{speechText}"</p>
               <div className="h-px bg-slate-800 w-full" />
-              <div className="text-emerald-500 text-xs uppercase font-bold tracking-tighter">Translation</div>
+              
+              <div className="flex items-center justify-between">
+                <div className="text-emerald-500 text-xs uppercase font-bold tracking-tighter">Translation</div>
+                
+                {/* Replay Speaker Button */}
+                {translatedText && !isTranslating && (
+                  <button 
+                    onClick={handleReplayAudio}
+                    title="Replay Translation Audio"
+                    className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-orange-400 rounded-lg text-xs font-semibold transition active:scale-95"
+                  >
+                    <Volume2 size={14} />
+                    <span>Replay</span>
+                  </button>
+                )}
+              </div>
+
               {isTranslating ? <Loader2 className="animate-spin text-emerald-500" /> : <p className="text-2xl font-black text-white">{translatedText}</p>}
             </div>
           ) : (

@@ -1,3 +1,4 @@
+// app/page.js
 "use client";
 
 import React, { useState, useEffect } from 'react';
@@ -11,6 +12,12 @@ export default function LandingPage() {
   // Auth & Database States
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  
+  // Password Visibility States
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false); // Defaulted to Login
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -46,6 +53,12 @@ export default function LandingPage() {
     e.preventDefault();
     setLoading(true);
     setMessage({ type: '', text: '' });
+
+    if (isSignUp && password !== confirmPassword) {
+      setMessage({ type: 'error', text: 'Passwords do not match. Please check and try again.' });
+      setLoading(false);
+      return;
+    }
 
     try {
       if (isSignUp) {
@@ -90,7 +103,22 @@ export default function LandingPage() {
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans">
       <header className="max-w-7xl w-full mx-auto px-6 py-6 flex justify-between items-center">
         <span className="text-2xl font-black bg-gradient-to-r from-orange-500 to-emerald-500 bg-clip-text text-transparent">NaijaToBabi</span>
-        <span className="text-sm font-bold uppercase tracking-widest text-slate-400">{isSignUp ? 'Signup' : 'Login'}</span>
+        
+        {/* Header Action Buttons for Login/Signup state */}
+        <div className="flex items-center space-x-3">
+          <button 
+            onClick={() => { setIsSignUp(false); setMessage({ type: '', text: '' }); }}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${!isSignUp ? 'bg-orange-500 text-white shadow-md' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'}`}
+          >
+            Log In
+          </button>
+          <button 
+            onClick={() => { setIsSignUp(true); setMessage({ type: '', text: '' }); }}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${isSignUp ? 'bg-orange-500 text-white shadow-md' : 'bg-slate-900 text-slate-400 hover:text-white border border-slate-800'}`}
+          >
+            Sign Up
+          </button>
+        </div>
       </header>
 
       <main className="max-w-7xl w-full mx-auto px-6 py-16 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -99,26 +127,100 @@ export default function LandingPage() {
           <p className="text-lg text-slate-400 max-w-xl">Master Ivorian French and Nouchi in under 30 days. No boring textbooks—just real vibes.</p>
           <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 max-w-md">
             <button onClick={playSample} className="flex items-center space-x-4">
-              <div className={`h-12 w-12 rounded-full bg-orange-500 flex items-center justify-center ${isPlaying ? 'animate-pulse' : ''}`}>▶</div>
+              <div className={`h-12 w-12 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold ${isPlaying ? 'animate-pulse' : ''}`}>▶</div>
               <p className="font-semibold">"Ça dit quoi, mon vieux?"</p>
             </button>
           </div>
         </div>
 
         <div className="lg:col-span-5 w-full max-w-md mx-auto">
-          <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-8 backdrop-blur-md">
+          <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-8 backdrop-blur-md shadow-xl">
             <h2 className="text-2xl font-bold mb-6">{isSignUp ? 'Create Account' : 'Welcome Back'}</h2>
-            {message.text && <div className={`p-3 mb-4 rounded-xl text-xs ${message.type === 'success' ? 'bg-emerald-500/10' : 'bg-red-500/10'}`}>{message.text}</div>}
+            {message.text && <div className={`p-3 mb-4 rounded-xl text-xs ${message.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>{message.text}</div>}
             
             <form className="space-y-4" onSubmit={handleAuth}>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-500" required />
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-500" required />
-              <button type="submit" disabled={loading} className="w-full py-3 bg-orange-500 hover:bg-orange-600 font-bold rounded-xl text-sm">{loading ? 'Processing...' : (isSignUp ? 'Sign Up' : 'Log In')}</button>
+              <div>
+                <input 
+                  type="email" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)} 
+                  placeholder="Email Address" 
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-orange-500 transition-colors" 
+                  required 
+                />
+              </div>
+
+              {/* Password Field with View Toggle */}
+              <div className="relative">
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  placeholder="Password" 
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 pr-12 text-sm outline-none focus:border-orange-500 transition-colors" 
+                  required 
+                />
+                <button 
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-200 font-mono py-1 px-1.5 rounded"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+
+              {/* Confirm Password Field (Only visible during Sign Up) */}
+              {isSignUp && (
+                <div className="relative">
+                  <input 
+                    type={showConfirmPassword ? "text" : "password"} 
+                    value={confirmPassword} 
+                    onChange={(e) => setConfirmPassword(e.target.value)} 
+                    placeholder="Confirm Password" 
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 pr-12 text-sm outline-none focus:border-orange-500 transition-colors" 
+                    required 
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-200 font-mono py-1 px-1.5 rounded"
+                  >
+                    {showConfirmPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
+              )}
+
+              <button 
+                type="submit" 
+                disabled={loading} 
+                className="w-full py-3 bg-orange-500 hover:bg-orange-600 font-bold rounded-xl text-sm transition-all shadow-lg shadow-orange-500/20 active:scale-95"
+              >
+                {loading ? 'Processing...' : (isSignUp ? 'Create Account' : 'Log In')}
+              </button>
             </form>
 
-            <div className="relative flex items-center justify-center my-4"><div className="border-t border-slate-800 w-full"></div><span className="bg-slate-950 px-3 text-xs text-slate-500 absolute">or</span></div>
-            <button onClick={handleGoogleLogin} className="w-full py-3 bg-slate-950 border border-slate-800 hover:bg-slate-900 rounded-xl text-sm">Continue with Google</button>
-            <button onClick={() => setIsSignUp(!isSignUp)} className="w-full mt-4 text-xs text-slate-500 hover:text-orange-500">{isSignUp ? 'Already have an account? Log in' : 'Need an account? Sign up'}</button>
+            <div className="relative flex items-center justify-center my-6">
+              <div className="border-t border-slate-800 w-full"></div>
+              <span className="bg-slate-950 px-3 text-xs text-slate-500 absolute uppercase tracking-wider font-mono">or</span>
+            </div>
+
+            <button 
+              onClick={handleGoogleLogin} 
+              className="w-full py-3 bg-slate-950 border border-slate-800 hover:bg-slate-900 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2"
+            >
+              Continue with Google
+            </button>
+
+            {/* Highly Visible and Bold Switch Toggle Link */}
+            <div className="mt-6 text-center">
+              <button 
+                type="button"
+                onClick={() => { setIsSignUp(!isSignUp); setMessage({ type: '', text: '' }); }}
+                className="text-sm font-bold text-orange-400 hover:text-orange-300 transition-colors underline underline-offset-4"
+              >
+                {isSignUp ? 'Already have an account? Log in' : "Don't have an account? Sign up"}
+              </button>
+            </div>
           </div>
         </div>
       </main>
